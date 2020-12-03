@@ -1,16 +1,17 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 add_library( # Sets the name of the library.
-             native-lib
-             SHARED
-             native-lib.cpp )
+        native-lib
+        SHARED
+        native-lib.cpp)
 
 find_library( # Sets the name of the path variable.
-              log-lib
+        log-lib
 
-              log )
+        log)
 
 target_link_libraries( # Specifies the target library.
-                       native-lib
-
-                       ${log-lib} )
+        native-lib
+        GLESv3
+        android
+        ${log-lib})

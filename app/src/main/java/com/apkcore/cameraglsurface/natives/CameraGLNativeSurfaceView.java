@@ -1,5 +1,6 @@
-package com.apkcore.cameraglsurface;
+package com.apkcore.cameraglsurface.natives;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
@@ -8,47 +9,45 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 
-import com.apkcore.cameraglsurface.camera.CameraDrawer;
 import com.apkcore.cameraglsurface.camera.CameraProxy;
-import com.apkcore.cameraglsurface.util.ShaderUtils;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
+public class CameraGLNativeSurfaceView extends GLSurfaceView implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
     private static final String TAG = "CameraGLSurfaceView";
 
     private CameraProxy mCameraProxy;
     private SurfaceTexture mSurfaceTexture;
-    private CameraDrawer drawer;
-    private int textureId = -1;
+    private CameraNativeDrawer nativeDrawer;
     private int mRatioWidth;
     private int mRatioHeight;
     private float mOldDistance;
 
-    public CameraGLSurfaceView(Context context) {
+    public CameraGLNativeSurfaceView(Context context) {
         this(context, null);
     }
 
-    public CameraGLSurfaceView(Context context, AttributeSet attrs) {
+    public CameraGLNativeSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
     private void init(Context context) {
+        nativeDrawer = new CameraNativeDrawer();
         mCameraProxy = new CameraProxy((Activity) context);
-        setEGLContextClientVersion(2);
+        setEGLContextClientVersion(3);
         setRenderer(this);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        textureId = ShaderUtils.getOesTexture();
-        mSurfaceTexture = new SurfaceTexture(textureId);
+        mSurfaceTexture = new SurfaceTexture(nativeDrawer.getOesTexture());
         mSurfaceTexture.setOnFrameAvailableListener(this);
         mCameraProxy.openCamera();
-        drawer = new CameraDrawer(getContext());
+        nativeDrawer.registerAssetManager(getContext().getAssets());
+        nativeDrawer.surfaceCreate();
     }
 
     @Override
@@ -62,15 +61,14 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         } else {
             setAspectRatio(previewHeight, previewWidth);
         }
-        ShaderUtils.glViewport(width, height);
+        nativeDrawer.surfaceChange(width, height);
         mCameraProxy.startPreview(mSurfaceTexture);
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        ShaderUtils.clear(0, 0, 0, 1);
         mSurfaceTexture.updateTexImage();
-        drawer.draw(textureId, mCameraProxy.isFrontCamera());
+        nativeDrawer.surfaceDraw(mCameraProxy.isFrontCamera());
     }
 
     @Override
@@ -117,6 +115,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getPointerCount() == 1) {
