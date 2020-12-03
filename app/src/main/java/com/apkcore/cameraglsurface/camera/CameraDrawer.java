@@ -2,7 +2,7 @@ package com.apkcore.cameraglsurface.camera;
 
 import android.content.Context;
 import android.opengl.GLES11Ext;
-import android.opengl.GLES20;
+import android.opengl.GLES30;
 
 import com.apkcore.cameraglsurface.util.ShaderUtils;
 
@@ -36,8 +36,8 @@ public class CameraDrawer {
     };
     private static final byte[] VERTEX_ORDER = {0, 1, 2, 3};
     private final int mProgram;
-    private final int mPositionHandle;
-    private final int mTextureHandle;
+    private final int mPositionHandle = 0;
+    private final int mTextureHandle = 1;
     private FloatBuffer mVertexBuffer;
     private FloatBuffer mBackTextureBuffer;
     private FloatBuffer mFrontTextureBuffer;
@@ -64,28 +64,28 @@ public class CameraDrawer {
         String fragmentShader = ShaderUtils.loadFromAssets("fragment_shader.glsl", context.getResources());
 
         mProgram = ShaderUtils.createProgram(vertexShader, fragmentShader);
-        mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
-        mTextureHandle = GLES20.glGetAttribLocation(mProgram, "inputTextureCoordinate");
+//        mPositionHandle = GLES30.glGetAttribLocation(mProgram, "vPosition");
+//        mTextureHandle = GLES30.glGetAttribLocation(mProgram, "inputTextureCoordinate");
     }
 
     public void draw(int textureId, boolean isFrontCamera) {
-        GLES20.glUseProgram(mProgram);
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
+        GLES30.glUseProgram(mProgram);
+        GLES30.glEnable(GLES30.GL_CULL_FACE);
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
+        GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
 
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
-        GLES20.glVertexAttribPointer(mPositionHandle, 2, GLES20.GL_FLOAT, false, 2 * 4, mVertexBuffer);
+        GLES30.glEnableVertexAttribArray(mPositionHandle);
+        GLES30.glVertexAttribPointer(mPositionHandle, 2, GLES30.GL_FLOAT, false, 2 * 4, mVertexBuffer);
 
-        GLES20.glEnableVertexAttribArray(mTextureHandle);
+        GLES30.glEnableVertexAttribArray(mTextureHandle);
         if (isFrontCamera) {
-            GLES20.glVertexAttribPointer(mTextureHandle, 2, GLES20.GL_FLOAT, false, 2 * 4, mFrontTextureBuffer);
+            GLES30.glVertexAttribPointer(mTextureHandle, 2, GLES30.GL_FLOAT, false, 2 * 4, mFrontTextureBuffer);
         } else {
-            GLES20.glVertexAttribPointer(mTextureHandle, 2, GLES20.GL_FLOAT, false, 2 * 4, mBackTextureBuffer);
+            GLES30.glVertexAttribPointer(mTextureHandle, 2, GLES30.GL_FLOAT, false, 2 * 4, mBackTextureBuffer);
         }
-        GLES20.glDrawElements(GLES20.GL_TRIANGLE_FAN, VERTEX_ORDER.length, GLES20.GL_UNSIGNED_BYTE, mDrawListBuffer);
-        GLES20.glDisableVertexAttribArray(mPositionHandle);
-        GLES20.glDisableVertexAttribArray(mTextureHandle);
+        GLES30.glDrawElements(GLES30.GL_TRIANGLE_FAN, VERTEX_ORDER.length, GLES30.GL_UNSIGNED_BYTE, mDrawListBuffer);
+        GLES30.glDisableVertexAttribArray(mPositionHandle);
+        GLES30.glDisableVertexAttribArray(mTextureHandle);
     }
 
 }

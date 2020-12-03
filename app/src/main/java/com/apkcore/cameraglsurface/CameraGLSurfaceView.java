@@ -3,7 +3,7 @@ package com.apkcore.cameraglsurface;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -63,14 +63,14 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         } else {
             setAspectRatio(previewHeight, previewWidth);
         }
-        GLES20.glViewport(0, 0, width, height);
+        GLES30.glViewport(0, 0, width, height);
         mCameraProxy.startPreview(mSurfaceTexture);
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        GLES20.glClearColor(0, 0, 0, 1);
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        GLES30.glClearColor(0, 0, 0, 1);
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);
         mSurfaceTexture.updateTexImage();
         drawer.draw(textureId, mCameraProxy.isFrontCamera());
     }
